@@ -1,12 +1,5 @@
-//
-//  ViewController.swift
-//  TaskApp
-//
-//  Created by WEBSYSTEM-MAC41 on 2024/07/07.
-//
-
 import UIKit
-import RealmSwift   // ←追加
+import RealmSwift
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
@@ -19,15 +12,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     //検索結果配列
     var searchResult: Results<Task>?
     
-    // DB内のタスクが格納されるリスト。
-    // 日付の近い順でソート：昇順
+    // DB内のタスクが格納されるリスト。(日付の近い順でソート：昇順)
     // 以降内容をアップデートするとリスト内は自動的に更新される。
-    var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)  // ←追加
-    
+    var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-//        tableView.fillerRowHeight = UITableView.automaticDimension
         tableView.delegate = self
         tableView.dataSource = self
         searchBar.delegate = self
@@ -65,7 +54,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // 再利用可能な cell を得る
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
-        // Cellに値を設定する  --- ここから ---
+        // Cellに値を設定する
         if let task =  searchResult?[indexPath.row]{
             var content = cell.defaultContentConfiguration()
             content.text = task.title
@@ -75,7 +64,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             content.secondaryText = dateString
             cell.contentConfiguration = content
         }
-        // --- ここまで追加 ---
         
         return cell
     }
@@ -92,7 +80,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // Delete ボタンが押された時に呼ばれるメソッド
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        // --- ここから ---
+        
         if editingStyle == .delete {
             // 削除するタスクを取得する
             let task = self.taskArray[indexPath.row]
@@ -115,29 +103,29 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     print("---------------/")
                 }
             }
-        } // --- ここまで変更 ---
+        }
     }
     
     // 検索ボタン押下時の呼び出しメソッド
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.endEditing(true)
-            filterTasks(searchText: searchBar.text)
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.endEditing(true)
+        filterTasks(searchText: searchBar.text)
+    }
+    
+    // 検索文字列が変更されたときに呼び出されるメソッド
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filterTasks(searchText: searchText)
+    }
+    
+    // 検索条件に基づいてタスクをフィルタリングする
+    func filterTasks(searchText: String?) {
+        if let searchText = searchText, !searchText.isEmpty {
+            searchResult = taskArray.filter("category BEGINSWITH  %@", searchText)
+        } else {
+            searchResult = taskArray
         }
-        
-        // 検索文字列が変更されたときに呼び出されるメソッド
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            filterTasks(searchText: searchText)
-        }
-        
-        // 検索条件に基づいてタスクをフィルタリングする
-        func filterTasks(searchText: String?) {
-            if let searchText = searchText, !searchText.isEmpty {
-                searchResult = taskArray.filter("category BEGINSWITH  %@", searchText)
-            } else {
-                searchResult = taskArray
-            }
-            tableView.reloadData()
-        }
+        tableView.reloadData()
+    }
     
 }
-    
+

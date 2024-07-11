@@ -1,10 +1,3 @@
-//
-//  InputViewController.swift
-//  TaskApp
-//
-//  Created by WEBSYSTEM-MAC41 on 2024/07/07.
-//
-
 import UIKit
 import RealmSwift
 
@@ -16,12 +9,11 @@ class InputViewController: UIViewController {
     @IBOutlet weak var datePicker: UIDatePicker!
     
     let realm = try! Realm()
-    var task: Task!   // 追加する
+    var task: Task!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Do any additional setup after loading the view.
         
         // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(dismissKeyboard))
@@ -45,7 +37,7 @@ class InputViewController: UIViewController {
         super.viewWillDisappear(animated)
     }
     
-    // タスクのローカル通知を登録する --- ここから ---
+    // タスクのローカル通知を登録する
     func setNotification(task: Task) {
         let content = UNMutableNotificationContent()
         // タイトルと内容を設定(中身がない場合メッセージ無しで音だけの通知になるので「(xxなし)」を表示する)
@@ -72,7 +64,8 @@ class InputViewController: UIViewController {
         // ローカル通知を登録
         let center = UNUserNotificationCenter.current()
         center.add(request) { (error) in
-            print(error ?? "ローカル通知登録 OK")  // error が nil ならローカル通知の登録に成功したと表示します。errorが存在すればerrorを表示します。
+            print(error ?? "ローカル通知登録 OK")
+            // error が nilならローカル通知の登録に成功したと表示します。errorが存在すればerrorを表示します。
         }
         
         // 未通知のローカル通知一覧をログ出力
@@ -83,22 +76,11 @@ class InputViewController: UIViewController {
                 print("---------------/")
             }
         }
-    } // --- ここまで追加 ---
+    }
     
     
     @objc func dismissKeyboard(){
         // キーボードを閉じる
         view.endEditing(true)
     }
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destination.
-     // Pass the selected object to the new view controller.
-     }
-     */
-    
 }
