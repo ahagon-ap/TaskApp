@@ -9,19 +9,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // Realmインスタンスを取得する
     let realm = try! Realm()  // ←追加
     
-    //検索結果配列
-    var searchResult: Results<Task>?
-    
     // DB内のタスクが格納されるリスト。(日付の近い順でソート：昇順)
     // 以降内容をアップデートするとリスト内は自動的に更新される。
     var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.fillerRowHeight = UITableView.automaticDimension
         tableView.delegate = self
         tableView.dataSource = self
         searchBar.delegate = self
-        
-        searchResult = taskArray
         
         searchBar.autocapitalizationType = .none
     }
@@ -32,7 +28,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         if segue.identifier == "cellSegue" {
             let indexPath = self.tableView.indexPathForSelectedRow
-            inputViewController.task = searchResult?[indexPath!.row]
+            inputViewController.task = taskArray[indexPath!.row]
         } else {
             inputViewController.task = Task()
         }
@@ -46,7 +42,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // データの数（＝セルの数）を返すメソッド
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return  searchResult?.count ?? 0  // ←修正する
+        return  taskArray.count
     }
     
     // 各セルの内容を返すメソッド
@@ -55,15 +51,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         // Cellに値を設定する
-        if let task =  searchResult?[indexPath.row]{
-            var content = cell.defaultContentConfiguration()
-            content.text = task.title
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd HH:mm"
-            let dateString:String = formatter.string(from: task.date)
-            content.secondaryText = dateString
-            cell.contentConfiguration = content
-        }
+        let task =  taskArray[indexPath.row]
+        var content = cell.defaultContentConfiguration()
+        content.text = task.title
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        let dateString:String = formatter.string(from: task.date)
+        content.secondaryText = dateString
+        cell.contentConfiguration = content
         
         return cell
     }
@@ -119,10 +114,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // 検索条件に基づいてタスクをフィルタリングする
     func filterTasks(searchText: String?) {
+        taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
         if let searchText = searchText, !searchText.isEmpty {
-            searchResult = taskArray.filter("category BEGINSWITH  %@", searchText)
-        } else {
-            searchResult = taskArray
+            taskArray = taskArray.where { task in
+                task.category.starts(with: searchText)
+            }
         }
         tableView.reloadData()
     }

@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '17.2'
+platform :ios, '17.2'
 
 target 'TaskApp' do
   # Comment the next line if you don't want to use dynamic frameworks
